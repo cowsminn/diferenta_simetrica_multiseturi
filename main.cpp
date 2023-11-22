@@ -1,166 +1,109 @@
 #include <iostream>
+#include <set>
+#include <algorithm>
 
-#define k 20
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
 
-struct subvector {
-    int v[k] = {0};
-    subvector* next = nullptr;
+    explicit Node(int val) : data(val), left(nullptr), right(nullptr) {}
 };
 
-struct dynvector {
+class MultisetBST {
+private:
+    Node* root;
 
-    subvector* primul = nullptr;
-
-    void update(int poz, int x) {
-        int nrnod = poz / k;
-        int pozvector = poz % k;
-
-        if (nrnod >= 7) {
-            std::cerr << "noduri setate - 7" << std::endl;
-            exit(1);
+    Node* insert(Node* node, int val) {
+        if (node == nullptr) {
+            return new Node(val);
         }
+        if (val < node->data)
+            node->left = insert(node->left, val);
+        else
+            node->right = insert(node->right, val);
+        /// in caz ca elementele sunt egale in multiset nu mai pun conditia
+        /// pentru > ca sa se duca automat in dreapta
+        return node;
+    }
 
-        subvector* current = primul;
-        subvector* prev = nullptr;
-
-        for (int i = 0; i < nrnod; i++) {
-            if (current == nullptr) {
-                current = new subvector();
-                if (prev != nullptr) {
-                    prev->next = current;
-                } else {
-                    primul = current;
-                }
-                current->next = nullptr;
-            }
-            prev = current;
-            current = current->next;
+    void inorderTraversal(Node* node, std::multiset<int>& result) {
+        if (node != nullptr) {
+            inorderTraversal(node->left, result);
+            result.insert(node->data);
+            inorderTraversal(node->right, result);
         }
+    }
 
-        /// in caz ca poz < 20 => nrnod = 0 => nu intra pe for
+    void destroyTree(Node* node) {
+        if (node != nullptr) {
+            destroyTree(node->left);
+            destroyTree(node->right);
+            delete node;
+        }
+    }
 
-        if (current == nullptr) {
-            current = new subvector();
-            if (prev != nullptr) {
-                prev->next = current;
+    void customSymmetricDifference(const std::multiset<int>& set1, const std::multiset<int>& set2, std::multiset<int>& result) {
+        auto it1 = set1.begin();
+        auto it2 = set2.begin();
+
+        while (it1 != set1.end() && it2 != set2.end()) {
+            if (*it1 < *it2) {
+                result.insert(*it1);
+                ++it1;
+            } else if (*it2 < *it1) {
+                result.insert(*it2);
+                ++it2;
             } else {
-                primul = current;
+                ++it1;
+                ++it2;
             }
-            current->next = nullptr;
         }
-        current->v[pozvector] = x;
+
+        std::copy(it1, set1.end(), std::inserter(result, result.end()));
+        std::copy(it2, set2.end(), std::inserter(result, result.end()));
     }
 
-    int get(int poz) {
-        int nrnod = poz / k;
-        int pozvector = poz % k;
+public:
+    MultisetBST() : root(nullptr) {}
 
-        if (nrnod >= 7) {
-            std::cerr << "noduri setate - 7" << std::endl;
-            exit(1);
-        }
-
-        subvector* current = primul;
-
-        for (int i = 0; i < nrnod; i++) {
-            if (current == nullptr) {
-                return 0;
-            }
-            current = current->next;
-        }
-
-        if (current == nullptr) {
-            return 0;
-        }
-
-        return current->v[pozvector];
+    void insert(int val) {
+        root = insert(root, val);
     }
 
-    dynvector operator+(const dynvector& other) const {
-        dynvector rez;
+    std::multiset<int> symmetricDifference(MultisetBST& other) {
+        std::multiset<int> result;
 
-        subvector* currentv = primul;
-        subvector* currentother = other.primul;
+        std::multiset<int> thisSet;
+        inorderTraversal(root, thisSet);
 
-        while (currentv != nullptr || currentother != nullptr) {
-            subvector suma;
+        std::multiset<int> otherSet;
+        other.inorderTraversal(other.root, otherSet);
 
-            if (currentv != nullptr) {
-                for (int j = 0; j < k; j++) {
-                    suma.v[j] += currentv->v[j];
-                }
-                currentv = currentv->next;
-            }
+        customSymmetricDifference(thisSet, otherSet, result);
 
-            if (currentother != nullptr) {
-                for (int j = 0; j < k; j++) {
-                    suma.v[j] += currentother->v[j];
-                }
-                currentother = currentother->next;
-            }
-
-            /*
-            if (rez.primul == nullptr) {
-                rez.primul = new subvector(suma);
-            } else {
-                subvector* current = rez.primul;
-                while (current->next != nullptr) {
-                    current = current->next;
-                }
-                current->next = new subvector(suma);
-            }
-            */
-
-            rez.lipirev(suma);
-        }
-
-        return rez;
+        return result;
     }
 
-
-    void lipirev(const subvector& v) {
-        subvector* nodnou = new subvector(v);
-        nodnou->next = nullptr;
-
-        if (primul == nullptr) {
-            primul = nodnou;
-        } else {
-            subvector* current = primul;
-            while (current->next != nullptr) {
-                current = current->next;
-            }
-            current->next = nodnou;
-        }
-    }
-
-    ~dynvector() {
-        subvector* current = primul;
-        while (current != nullptr) {
-            subvector* next = current->next;
-            delete current;
-            current = next;
-        }
+    ~MultisetBST() {
+        destroyTree(root);
     }
 };
 
 int main() {
-    dynvector v1, v2;
+    MultisetBST set1, set2;
 
-    v1.update(90, 15);
-    v2.update(24, 10);
-    v2.update(90,2);
+    set1.insert(1);
+    set1.insert(2);
+    set1.insert(2);
 
-    ///std::cout << v1.get(200); - er
-    ///v1.update(200,200); - er
+    set2.insert(2);
+    set2.insert(3);
 
-    dynvector suma = v1 + v2;
+    std::multiset<int> result = set1.symmetricDifference(set2);
 
-    for (int i = 0; i < 140; i++) {
-        std::cout << suma.get(i) << " ";
-        if ((i + 1) % 20 == 0) {
-            std::cout << std::endl;
-        }
-    }
+    for (auto value : result)
+        std::cout << value << " ";
 
     return 0;
 }
