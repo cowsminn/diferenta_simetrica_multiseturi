@@ -10,7 +10,7 @@ struct Node {
     explicit Node(int val) : data(val), left(nullptr), right(nullptr) {}
 };
 
-class MultisetBST {
+class Multiset {
 private:
     Node* root;
 
@@ -27,23 +27,23 @@ private:
         return node;
     }
 
-    void inorderTraversal(Node* node, std::multiset<int>& result) {
+    void parcurgere(Node* node, std::multiset<int>& result) {
         if (node != nullptr) {
-            inorderTraversal(node->left, result);
+            parcurgere(node->left, result);
             result.insert(node->data);
-            inorderTraversal(node->right, result);
+            parcurgere(node->right, result);
         }
     }
 
-    void destroyTree(Node* node) {
+    void destrc(Node* node) {
         if (node != nullptr) {
-            destroyTree(node->left);
-            destroyTree(node->right);
+            destrc(node->left);
+            destrc(node->right);
             delete node;
         }
     }
 
-    void customSymmetricDifference(const std::multiset<int>& set1, const std::multiset<int>& set2, std::multiset<int>& result) {
+    void diferenta(const std::multiset<int>& set1, const std::multiset<int>& set2, std::multiset<int>& result) {
         auto it1 = set1.begin();
         auto it2 = set2.begin();
 
@@ -65,42 +65,43 @@ private:
     }
 
 public:
-    MultisetBST() : root(nullptr) {}
+    Multiset() : root(nullptr) {}
 
     void insert(int val) {
         root = insert(root, val);
     }
 
-    std::multiset<int> symmetricDifference(MultisetBST& other) {
+    std::multiset<int> diferenta_simetrica(Multiset& other) {
         std::multiset<int> result;
 
         std::multiset<int> thisSet;
-        inorderTraversal(root, thisSet);
+        parcurgere(root, thisSet);
 
         std::multiset<int> otherSet;
-        other.inorderTraversal(other.root, otherSet);
+        other.parcurgere(other.root, otherSet);
 
-        customSymmetricDifference(thisSet, otherSet, result);
+        diferenta(thisSet, otherSet, result);
 
         return result;
     }
 
-    ~MultisetBST() {
-        destroyTree(root);
+    ~Multiset() {
+        destrc(root);
     }
 };
 
 int main() {
-    MultisetBST set1, set2;
+    Multiset set1, set2;
 
     set1.insert(1);
     set1.insert(2);
     set1.insert(2);
+    set1.insert(3);
 
     set2.insert(2);
     set2.insert(3);
 
-    std::multiset<int> result = set1.symmetricDifference(set2);
+    std::multiset<int> result = set1.diferenta_simetrica(set2);
 
     for (auto value : result)
         std::cout << value << " ";
