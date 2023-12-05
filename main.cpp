@@ -1,111 +1,125 @@
 #include <iostream>
-#include <set>
-#include <algorithm>
+#include <cstdlib>
 
-struct Node {
-    int data;
-    Node* left;
-    Node* right;
+class NodArbore {
+public:
+    char cheie;
+    int numar;
+    NodArbore* stanga;
+    NodArbore* dreapta;
 
-    explicit Node(int val) : data(val), left(nullptr), right(nullptr) {}
+    NodArbore(char element) : cheie(element), numar(1), stanga(nullptr), dreapta(nullptr) {}
 };
 
-class Multiset {
+class ArboreBinarDeCautare {
 private:
-    Node* root;
+    NodArbore* radacina;
 
-    Node* insert(Node* node, int val) {
-        if (node == nullptr) {
-            return new Node(val);
+    NodArbore* inserare(NodArbore* nod, char cheie) {
+        if (nod == nullptr) return new NodArbore(cheie);
+
+        if (cheie == nod->cheie) {
+            (nod->numar)++;
+        } else if (cheie < nod->cheie) {
+            nod->stanga = inserare(nod->stanga, cheie);
+        } else {
+            nod->dreapta = inserare(nod->dreapta, cheie);
         }
-        if (val < node->data)
-            node->left = insert(node->left, val);
-        else
-            node->right = insert(node->right, val);
-        /// in caz ca elementele sunt egale in multiset nu mai pun conditia
-        /// pentru > ca sa se duca automat in dreapta
-        return node;
+
+        return nod;
     }
 
-    void parcurgere(Node* node, std::multiset<int>& result) {
-        if (node != nullptr) {
-            parcurgere(node->left, result);
-            result.insert(node->data);
-            parcurgere(node->right, result);
-        }
+    NodArbore* difSimetricaArbori(NodArbore* arbore1, NodArbore* arbore2) {
+        if (arbore1 == nullptr && arbore2 == nullptr) return nullptr;
+        if (arbore1 == nullptr) return new NodArbore(arbore2->cheie);
+        if (arbore2 == nullptr) return new NodArbore(arbore1->cheie);
+
+        NodArbore* rezultat = new NodArbore(arbore1->cheie);
+        rezultat->numar = abs(arbore1->numar - arbore2->numar);
+
+        rezultat->stanga = difSimetricaArbori(arbore1->stanga, arbore2->stanga);
+        rezultat->dreapta = difSimetricaArbori(arbore1->dreapta, arbore2->dreapta);
+
+        return rezultat;
     }
 
-    void destrc(Node* node) {
-        if (node != nullptr) {
-            destrc(node->left);
-            destrc(node->right);
-            delete node;
-        }
-    }
-
-    void diferenta(const std::multiset<int>& set1, const std::multiset<int>& set2, std::multiset<int>& result) {
-        auto it1 = set1.begin();
-        auto it2 = set2.begin();
-
-        while (it1 != set1.end() && it2 != set2.end()) {
-            if (*it1 < *it2) {
-                result.insert(*it1);
-                ++it1;
-            } else if (*it2 < *it1) {
-                result.insert(*it2);
-                ++it2;
-            } else {
-                ++it1;
-                ++it2;
+    void parcurgereInordine(NodArbore* radacina) {
+        if (radacina != nullptr) {
+            parcurgereInordine(radacina->stanga);
+            if (radacina->numar != 0) {
+                std::cout << radacina->cheie << "(" << radacina->numar << ") ";
             }
+            parcurgereInordine(radacina->dreapta);
         }
-
-        std::copy(it1, set1.end(), std::inserter(result, result.end()));
-        std::copy(it2, set2.end(), std::inserter(result, result.end()));
     }
 
 public:
-    Multiset() : root(nullptr) {}
+    ArboreBinarDeCautare() : radacina(nullptr) {}
 
-    void insert(int val) {
-        root = insert(root, val);
+    void inserare(char cheie) {
+        radacina = inserare(radacina, cheie);
     }
 
-    std::multiset<int> diferenta_simetrica(Multiset& other) {
-        std::multiset<int> result;
-
-        std::multiset<int> thisSet;
-        parcurgere(root, thisSet);
-
-        std::multiset<int> otherSet;
-        other.parcurgere(other.root, otherSet);
-
-        diferenta(thisSet, otherSet, result);
-
-        return result;
-
+    void difSimetricaArbori(ArboreBinarDeCautare& arbore2) {
+        radacina = difSimetricaArbori(radacina, arbore2.radacina);
     }
 
-    ~Multiset() {
-        destrc(root);
+    void parcurgereInordine() {
+        parcurgereInordine(radacina);
+        std::cout << std::endl;
     }
 };
 
 int main() {
-    Multiset set1, set2;
 
-    set1.insert(1);
-    set1.insert(2);
-    set1.insert(2);
-    set1.insert(3);
+    ArboreBinarDeCautare arbore1, arbore2;
 
-    set2.insert(2);
-    set2.insert(3);
+    // Inserare elemente în arborele 1
+    arbore1.inserare('a');
+    arbore1.inserare('a');
+    arbore1.inserare('a');
+    arbore1.inserare('b');
+    arbore1.inserare('b');
+    arbore1.inserare('c');
+    arbore1.inserare('c');
+    arbore1.inserare('a');
+    arbore1.inserare('c');
+    arbore1.inserare('c');
+    arbore1.inserare('c');
+    arbore1.inserare('c');
+    arbore1.inserare('c');
+    arbore1.inserare('a');
+    arbore1.inserare('a');
+    arbore1.inserare('a');
+    arbore1.inserare('a');
 
-    std::multiset<int> result = set1.diferenta_simetrica(set2);
 
-    for (auto value : result)
-        std::cout << value << " ";
+
+    // Inserare elemente în arborele 2
+    arbore2.inserare('a');
+    arbore2.inserare('a');
+    arbore2.inserare('b');
+    arbore2.inserare('b');
+    arbore2.inserare('b');
+    arbore2.inserare('b');
+    arbore2.inserare('c');
+    arbore2.inserare('c');
+    arbore2.inserare('c');
+    arbore2.inserare('a');
+    arbore2.inserare('a');
+    arbore2.inserare('a');
+    arbore2.inserare('a');
+
+    std::cout << "Parcurgere a arborelui 1: ";
+    arbore1.parcurgereInordine();
+
+    std::cout << "Parcurgere arborelui 2: ";
+    arbore2.parcurgereInordine();
+
+    arbore1.difSimetricaArbori(arbore2);
+
+    std::cout << "Diferenta simetrica: ";
+    arbore1.parcurgereInordine();
 
     return 0;
 }
