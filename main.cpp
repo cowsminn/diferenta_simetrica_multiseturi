@@ -8,28 +8,28 @@ public:
     NodArbore* stanga;
     NodArbore* dreapta;
 
-    NodArbore(char element) : cheie(element), numar(1), stanga(nullptr), dreapta(nullptr) {}
+    explicit NodArbore(char element) : cheie(element), numar(1), stanga(nullptr), dreapta(nullptr) {}
 };
 
 class ArboreBinarDeCautare {
 private:
     NodArbore* radacina;
 
-    NodArbore* inserare(NodArbore* nod, char cheie) {
+    NodArbore* insert(NodArbore* nod, char cheie) {
         if (nod == nullptr) return new NodArbore(cheie);
 
         if (cheie == nod->cheie) {
             (nod->numar)++;
         } else if (cheie < nod->cheie) {
-            nod->stanga = inserare(nod->stanga, cheie);
+            nod->stanga = insert(nod->stanga, cheie);
         } else {
-            nod->dreapta = inserare(nod->dreapta, cheie);
+            nod->dreapta = insert(nod->dreapta, cheie);
         }
 
         return nod;
     }
 
-    NodArbore* difSimetricaArbori(NodArbore* arbore1, NodArbore* arbore2) {
+    NodArbore* dif_simetrica(NodArbore* arbore1, NodArbore* arbore2) {
         if (arbore1 == nullptr && arbore2 == nullptr) return nullptr;
         if (arbore1 == nullptr) return new NodArbore(arbore2->cheie);
         if (arbore2 == nullptr) return new NodArbore(arbore1->cheie);
@@ -37,19 +37,19 @@ private:
         NodArbore* rezultat = new NodArbore(arbore1->cheie);
         rezultat->numar = abs(arbore1->numar - arbore2->numar);
 
-        rezultat->stanga = difSimetricaArbori(arbore1->stanga, arbore2->stanga);
-        rezultat->dreapta = difSimetricaArbori(arbore1->dreapta, arbore2->dreapta);
+        rezultat->stanga = dif_simetrica(arbore1->stanga, arbore2->stanga);
+        rezultat->dreapta = dif_simetrica(arbore1->dreapta, arbore2->dreapta);
 
         return rezultat;
     }
 
-    void parcurgereInordine(NodArbore* radacina) {
+    void parcurgere(NodArbore* radacina) {
         if (radacina != nullptr) {
-            parcurgereInordine(radacina->stanga);
+            parcurgere(radacina->stanga);
             if (radacina->numar != 0) {
                 std::cout << radacina->cheie << "(" << radacina->numar << ") ";
             }
-            parcurgereInordine(radacina->dreapta);
+            parcurgere(radacina->dreapta);
         }
     }
 
@@ -57,15 +57,15 @@ public:
     ArboreBinarDeCautare() : radacina(nullptr) {}
 
     void inserare(char cheie) {
-        radacina = inserare(radacina, cheie);
+        radacina = insert(radacina, cheie);
     }
 
     void difSimetricaArbori(ArboreBinarDeCautare& arbore2) {
-        radacina = difSimetricaArbori(radacina, arbore2.radacina);
+        radacina = dif_simetrica(radacina, arbore2.radacina);
     }
 
     void parcurgereInordine() {
-        parcurgereInordine(radacina);
+        parcurgere(radacina);
         std::cout << std::endl;
     }
 };
