@@ -70,7 +70,7 @@ public:
         radacina = insert(radacina, cheie);
     }
 
-    void difSimetricaArbori(ArboreBinarDeCautare& arbore2) {
+    void difSimetricaArbori(ArboreBinarDeCautare const &arbore2) {
         radacina = dif_simetrica(radacina, arbore2.radacina);
     }
 
@@ -108,6 +108,7 @@ int main() {
     // Inserare elemente în arborele 2
     arbore2.inserare('a');
     arbore2.inserare('a');
+    arbore2.inserare('b');
     arbore2.inserare('b');
     arbore2.inserare('b');
     arbore2.inserare('b');
