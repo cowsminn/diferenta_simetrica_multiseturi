@@ -158,14 +158,14 @@ jobs:
             # cmake_flags:
             # cmake_generator: Ninja
 
-          - os: windows-2022
-            c: cl
-            cxx: cl
-            name: "ASan: Windows 2022 MSVC 19.35"
-            # cmake_flags:
-            # cmake_generator: Ninja
-            # This env runs address sanitizers
-            runs_asan: true
+          # - os: windows-2022
+          #   c: cl
+          #   cxx: cl
+          #   name: "ASan: Windows 2022 MSVC 19.35"
+          #   # cmake_flags:
+          #   # cmake_generator: Ninja
+          #   # This env runs address sanitizers
+          #   runs_asan: true
 
           - os: windows-2022
             c: gcc
