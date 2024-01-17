@@ -1,136 +1,79 @@
 #include <iostream>
-#include <memory>
+#include <vector>
+#include <set>
+#include <algorithm>
+using namespace std;
 
-class NodArbore {
-public:
-    char cheie;
-    int numar;
-    std::shared_ptr<NodArbore> stanga;
-    std::shared_ptr<NodArbore> dreapta;
-
-    explicit NodArbore(char element) : cheie(element), numar(1), stanga(nullptr), dreapta(nullptr) {}
+struct NodArbore {
+    vector<char> cheie;
+    NodArbore* left;
+    NodArbore* right;
 };
 
-class ArboreBinarDeCautare {
-private:
-    std::shared_ptr<NodArbore> radacina;
+NodArbore* newNode(const vector<char>& item) {
+    NodArbore* temp = new NodArbore;
+    temp->cheie = item;
+    temp->left = temp->right = nullptr;
+    return temp;
+}
 
-    std::shared_ptr<NodArbore> insert(std::shared_ptr<NodArbore> nod, char cheie) {
-        if (nod == nullptr) return std::make_shared<NodArbore>(cheie);
+NodArbore* insert(NodArbore* nod, const vector<char>& cheie) {
+    if (nod == nullptr) return newNode(cheie);
 
-        if (cheie == nod->cheie) {
-            (nod->numar)++;
-        } else if (cheie < nod->cheie) {
-            nod->stanga = insert(nod->stanga, cheie);
-        } else {
-            nod->dreapta = insert(nod->dreapta, cheie);
+    if (cheie < nod->cheie)
+        nod->left = insert(nod->left, cheie);
+    else if (cheie > nod->cheie)
+        nod->right = insert(nod->right, cheie);
+
+    return nod;
+}
+
+void findint(NodArbore* nod, char find, int& cnt) {
+    if (nod == nullptr) return ;
+    cnt = 0 ;
+    vector<char> c = nod->cheie;
+    if(c[0] == find)
+        while(c.size())
+        {
+            cnt++;
+            c.pop_back();
         }
 
-        // Delete nodes with a count of zero
-        if (nod->numar == 0) {
-            nod = nullptr;
-        }
+    else { findint(nod->left, find, cnt);
+        findint(nod->right, find, cnt);}
 
-        return nod;
+}
+
+void dif_simetrica(NodArbore* rad1, NodArbore* rad2) {
+    if (rad1 == nullptr) return;
+    int count = 0;
+    int cnt;
+    char found;
+    for (char c : rad1->cheie) {
+        count++;
+        found = c;
     }
+    findint(rad2, found, cnt);
+    cout << found << " " << abs(count - cnt) << endl;
+    dif_simetrica(rad1->left, rad2);
+    dif_simetrica(rad1->right, rad2);
 
-    std::shared_ptr<NodArbore> dif_simetrica(const std::shared_ptr<NodArbore>& arbore1, const std::shared_ptr<NodArbore>& arbore2) {
-        if (arbore1 == nullptr && arbore2 == nullptr) return nullptr;
-        if (arbore1 == nullptr) return std::make_shared<NodArbore>(arbore2->cheie);
-        if (arbore2 == nullptr) return std::make_shared<NodArbore>(arbore1->cheie);
-
-        auto rezultat = std::make_shared<NodArbore>(arbore1->cheie);
-        rezultat->numar = abs(arbore1->numar - arbore2->numar);
-
-        rezultat->stanga = dif_simetrica(arbore1->stanga, arbore2->stanga);
-        rezultat->dreapta = dif_simetrica(arbore1->dreapta, arbore2->dreapta);
-
-        // Delete nodes with a count of zero
-        if (rezultat->numar == 0) {
-            rezultat = nullptr;
-        }
-
-        return rezultat;
-    }
-
-    void parcurgere(const std::shared_ptr<NodArbore>& radacina) {
-        if (radacina != nullptr) {
-            parcurgere(radacina->stanga);
-            if (radacina->numar != 0) {
-                std::cout << radacina->cheie << "(" << radacina->numar << ") ";
-            }
-            parcurgere(radacina->dreapta);
-        }
-    }
-
-public:
-    ArboreBinarDeCautare() : radacina(nullptr) {}
-
-    void inserare(char cheie) {
-        radacina = insert(radacina, cheie);
-    }
-
-    void difSimetricaArbori(ArboreBinarDeCautare const &arbore2) {
-        radacina = dif_simetrica(radacina, arbore2.radacina);
-    }
-
-    void parcurgereInordine() {
-        parcurgere(radacina);
-        std::cout << std::endl;
-    }
-};
+}
 
 int main() {
 
-    ArboreBinarDeCautare arbore1, arbore2;
+    NodArbore* rad1 = nullptr;
+    rad1 = insert(rad1, {'a', 'a'});
+    insert(rad1, {'b', 'b', 'b', 'b'});
+    insert(rad1, {'c', 'c', 'c', 'c', 'c', 'c', 'c'});
 
-    // Inserare elemente în arborele 1
-    arbore1.inserare('a');
-    arbore1.inserare('a');
-    arbore1.inserare('a');
-    arbore1.inserare('b');
-    arbore1.inserare('b');
-    arbore1.inserare('c');
-    arbore1.inserare('c');
-    arbore1.inserare('a');
-    arbore1.inserare('c');
-    arbore1.inserare('c');
-    arbore1.inserare('c');
-    arbore1.inserare('c');
-    arbore1.inserare('c');
-    arbore1.inserare('a');
-    arbore1.inserare('a');
-    arbore1.inserare('a');
-    arbore1.inserare('a');
+    NodArbore* rad2 = nullptr;
+    rad2 = insert(rad2, {'b', 'b'});
+    insert(rad2, {'a', 'a', 'a', 'a'});
+    insert(rad2, {'c', 'c', 'c'});
 
-
-
-    // Inserare elemente în arborele 2
-    arbore2.inserare('a');
-    arbore2.inserare('a');
-    arbore2.inserare('b');
-    arbore2.inserare('b');
-    arbore2.inserare('b');
-    arbore2.inserare('b');
-    arbore2.inserare('b');
-    arbore2.inserare('c');
-    arbore2.inserare('c');
-    arbore2.inserare('c');
-    arbore2.inserare('a');
-    arbore2.inserare('a');
-    arbore2.inserare('a');
-    arbore2.inserare('a');
-
-    std::cout << "Parcurgere a arborelui 1: ";
-    arbore1.parcurgereInordine();
-
-    std::cout << "Parcurgere arborelui 2: ";
-    arbore2.parcurgereInordine();
-
-    arbore1.difSimetricaArbori(arbore2);
-
-    std::cout << "Diferenta simetrica: ";
-    arbore1.parcurgereInordine();
+    cout << "Differenta simetrica:" << endl;
+    dif_simetrica(rad1, rad2);
 
     return 0;
 }
