@@ -10,6 +10,15 @@ struct NodArbore {
     NodArbore* right;
 };
 
+void deleteTree(NodArbore* nod) {
+    if (nod == nullptr) return;
+
+    deleteTree(nod->left);
+    deleteTree(nod->right);
+    
+    delete nod;
+}
+
 NodArbore* newNode(const vector<char>& item) {
     NodArbore* temp = new NodArbore;
     temp->cheie = item;
@@ -74,6 +83,9 @@ int main() {
 
     cout << "Differenta simetrica:" << endl;
     dif_simetrica(rad1, rad2);
+
+    deleteTree(rad1);
+    deleteTree(rad2);
 
     return 0;
 }
